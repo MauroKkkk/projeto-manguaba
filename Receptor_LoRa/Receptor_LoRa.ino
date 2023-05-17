@@ -1,37 +1,61 @@
-#include <SoftwareSerial.h>
-#include <EBYTE.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include "Arduino.h"
 
-// DEFINIÇÕES DE PINOS
-#include <SoftwareSerial.h>
-#include <EBYTE.h>
- 
-#define M0_LoRa   11
-#define M1_LoRa   12
-#define RX_LoRa   2                                                          // Vai no TXD do módulo
-#define TX_LoRa   3                                                          // Vai no RXD do módulo
-#define AUX_LoRa  4                                                      // É o mesmo pino do LED presente na placa, então não precisa por um externo
- 
-SoftwareSerial lora(RX_LoRa, TX_LoRa);
-EBYTE LoRa(&lora, M0_LoRa, M1_LoRa, AUX_LoRa);
-// INSTANCIANDO OBJETOS
 
+#define RX_LoRa   16                                                          // Vai no TXD do módulo
+#define TX_LoRa    4                                                         // Vai no RXD do módulo
+
+
+short int httpResponseCode;
+const char* ssid = "ifal-adm";
+const char* password =  "ifal-adm";
+String url;
+String httpRequestData,payload;
+
+
+
+
+void Conectar(){
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("IP: " + (String)WiFi.localIP());  
+};
 void setup() {
+  pinMode(26,OUTPUT);
+  pinMode(27,OUTPUT);
+
+  Serial2.begin(9600, SERIAL_8N1, RX_LoRa, TX_LoRa);
   Serial.begin(9600);
-  lora.begin(9600);
-  LoRa.init();                                                                // Inicializa a comunicação e obtem todos os parâmetros do módulo
-  //LoRa.Reset();                                                             // Reseta parâmetros para os de fábrica
-  LoRa.SetAirDataRate(ADR_1K);                                                // Define a taxa de dados de transmissão
-  LoRa.SetAddress(1);                                                         // Define endereço da rede
-  LoRa.SetChannel(23);                                                        // Define canal como 23
-  LoRa.SaveParameters(TEMPORARY);                                             // Salva todas as definições de forma temporária
- 
-  LoRa.PrintParameters();                                                     // Imprime todos os parâmetros (configurações) obtidos do módulo 
-  LoRa.SetMode(MODE_NORMAL);      
+  digitalWrite(26,LOW);
+  digitalWrite(27,LOW);
+  Conectar();
 }
+void Enviar(String number){
+  HTTPClient http;
+  http.addHeader("Content-Type", "text/plain");
+  url = "http://192.168.7.226/Enviar?Dado="+number;//IP NodeJS
+  http.begin(url.c_str());
+  httpResponseCode = http.POST("");
+  delay(300);
+  if (httpResponseCode > 0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
+}
+
+
+
+
 void loop() {
-  if(lora.available()>0){
-    String input = lora.readString();
+  if(Serial2.available()>0){
+    String input = Serial2.readString();
     Serial.println(input);
-    
+    Enviar(input);  
     } 
+
 }
