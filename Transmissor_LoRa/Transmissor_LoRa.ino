@@ -1,9 +1,5 @@
 #include <SoftwareSerial.h>
 #include <EBYTE.h>
-
-// DEFINIÇÕES DE PINOS
-#include <SoftwareSerial.h>
-#include <EBYTE.h>
  
 #define M0_LoRa   11
 #define M1_LoRa   12
@@ -18,7 +14,7 @@ EBYTE LoRa(&lora, M0_LoRa, M1_LoRa, AUX_LoRa);
 void setup() {
   Serial.begin(9600);
   lora.begin(9600);
-  LoRa.init();                                                                // Inicializa a comunicação e obtem todos os parâmetros do módulo
+  LoRa.init();                                                                 // Inicializa a comunicação e obtem todos os parâmetros do módulo
   //LoRa.Reset();                                                             // Reseta parâmetros para os de fábrica
   LoRa.SetAirDataRate(ADR_1K);                                                // Define a taxa de dados de transmissão
   LoRa.SetAddress(1);                                                         // Define endereço da rede
@@ -30,7 +26,6 @@ void setup() {
 }
 
 void loop() {
-
-        lora.print("Dário pedro");
-        delay(10 00);
+        lora.print("KKK");
+        delay(2000);
 }
